@@ -71,53 +71,64 @@ $(document).ready(function() {
     })
 });
 
-// Funcionalidade de personalização de pedidos
 
-$(document).ready(function() {
-    $('#btn-personalizar').on('click', function() {
-        console.log("Botão de Personalizar Clicado!");
+
+$(document).ready(function () {
+
+    // abrir área de personalização
+    $('#btn-personalizar').on('click', function () {
         $('#personalizar-pedido').addClass('active');
         $('html, body').animate({
             scrollTop: $('#personalizar-pedido').offset().top - 100
         }, 500);
     });
 
-    $('#btn-fechar-personalizar').on('click', function() {
+    // fechar área de personalização
+    $('#btn-fechar-personalizar').on('click', function () {
         $('#personalizar-pedido').removeClass('active');
     });
 
-    $('#btn-finalizar-whatsapp').on('click', function() {
-        let mensagem = '🍝 *Pedido Personalizado*\n\n';
-        let temSelecao = false;
-
+    // enviar pedido para WhatsApp com os nomes (texto) corretos das opções
+    $('#btn-finalizar-whatsapp').on('click', function () {
         const dias = ['segunda', 'terca', 'quarta', 'quinta', 'sexta'];
         const diasNomes = {
-            'segunda': 'Segunda',
-            'terca': 'Terça',
-            'quarta': 'Quarta',
-            'quinta': 'Quinta',
-            'sexta': 'Sexta'
+            'segunda': 'Segunda-feira',
+            'terca': 'Terça-feira',
+            'quarta': 'Quarta-feira',
+            'quinta': 'Quinta-feira',
+            'sexta': 'Sexta-feira'
         };
 
-        dias.forEach(function(dia) {
-            const prato = $(`#prato-${dia}`).val();
-            const complemento = $(`#complemento-${dia}`).val();
+        let linhas = [];
 
-            if (prato && complemento) {
-                temSelecao = true;
-                mensagem += ` *${diasNomes[dia]}-feira*\n`;
-                mensagem += `    Prato: ${prato}\n`;
-                mensagem += `    Complemento: ${complemento}\n\n`;
+        dias.forEach(function (dia) {
+            const $prato = $(`#prato-${dia}`);
+            const $comp = $(`#complemento-${dia}`);
+
+            const pratoVal = $prato.val();
+            const compVal = $comp.val();
+
+            const pratoText = pratoVal ? $prato.find('option:selected').text().trim() : '';
+            const compText = compVal ? $comp.find('option:selected').text().trim() : '';
+
+            if (pratoText || compText) {
+                let bloco = `*${diasNomes[dia]}*\n`;
+                bloco += pratoText ? `Prato: ${pratoText}\n` : `Prato: —\n`;
+                bloco += compText ? `Complemento: ${compText}\n` : `Complemento: —\n`;
+                linhas.push(bloco);
             }
         });
 
-        if (!temSelecao) {
-            alert('Por favor, selecione pelo menos um dia com prato e complemento!');
+        if (linhas.length === 0) {
+            alert('Por favor, selecione pelo menos um prato ou complemento antes de finalizar.');
             return;
         }
 
-        const numeroWhatsApp = '5513991845634';
-        const url = `https://wa.me/${numeroWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+        let mensagem = '🍽️ *Pedido Semanal - Marmitana* \n\n' + linhas.join('\n');
+        const numeroWhats = '5513991845634';
+        const url = `https://wa.me/${numeroWhats}?text=${encodeURIComponent(mensagem)}`;
+
         window.open(url, '_blank');
     });
+
 });
